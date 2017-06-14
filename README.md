@@ -1,5 +1,4 @@
-bash-ansible-dynamic-inventory-dns
-##################################
+# bash-ansible-dynamic-inventory-dns
 
 Use TXT DNS records to create a dynamic inventory list usable by ansible
 
@@ -33,27 +32,27 @@ Utilisez les enregistrements DNS type TXT pour créer un inventaire d'hôte util
 ## DNS entry TXT example:
 
 * Host 1 (Debian, power-on, webserser)
-  host-1.example.org 86400 IN A 192.168.1.10
-  host-1.example.org 86400 IN TXT "os-debian"
-  host-1.example.org 86400 IN TXT "service-web"
+ - host-1.example.org 86400 IN A 192.168.1.10
+ - host-1.example.org 86400 IN TXT "os-debian"
+ - host-1.example.org 86400 IN TXT "service-web"
 * Host 2 (Debian, power-off, webserver
-  host-2.example.org 86400 IN A 192.168.1.12
-  host-2.example.org 86400 IN TXT "os-debian"
-  host-2.example.org 86400 IN TXT "service-web"
-  host-2.example.org 86400 IN TXT "power-off"
+ - host-2.example.org 86400 IN A 192.168.1.12
+ - host-2.example.org 86400 IN TXT "os-debian"
+ - host-2.example.org 86400 IN TXT "service-web"
+ - host-2.example.org 86400 IN TXT "power-off"
 * Host 3 (OpenSuse, power-on, database)
-  host-3.example.org 86400 IN A 192.168.1.13
-  host-3.example.org 86400 IN TXT "os-suse"
-  host-3.example.org 86400 IN TXT "service-db"
+ - host-3.example.org 86400 IN A 192.168.1.13
+ - host-3.example.org 86400 IN TXT "os-suse"
+ - host-3.example.org 86400 IN TXT "service-db"
 * Host 4 (OpenSuse, power-on, webserver) 
-  host-4.example.org 86400 IN A 192.168.1.14
-  host-4.example.org 86400 IN TXT "os-suse"
-  host-4.example.org 86400 IN TXT "service-web"
+ - host-4.example.org 86400 IN A 192.168.1.14
+ - host-4.example.org 86400 IN TXT "os-suse"
+ - host-4.example.org 86400 IN TXT "service-web"
 * Host 5 (OpenSuse, power-on, webserver) 
-  host-5.example.org 86400 IN A 192.168.1.15
-  host-5.example.org 86400 IN TXT "os-suse"
-  host-5.example.org 86400 IN TXT "service-web"
-  host-5.example.org 86400 IN TXT "power-off"
+ - host-5.example.org 86400 IN A 192.168.1.15
+ - host-5.example.org 86400 IN TXT "os-suse"
+ - host-5.example.org 86400 IN TXT "service-web"
+ - host-5.example.org 86400 IN TXT "power-off"
 
 ## You can specify host(s) in command line
 
@@ -81,4 +80,4 @@ Ansible help :
 
     ansible-playbook ping.yml --list-hosts
 
-    ansible-playbook ping.yml -l os-debian
+    ansible-playbook ping.yml -l os-debian --list-hosts
