@@ -16,7 +16,7 @@ Utilisez les enregistrements DNS type TXT pour créer un inventaire d'hôte util
     ansible-playbook ping.yml
     ```
 
-# Complet usage - Step by step :
+# Complete usage - Step by step :
  
 1. Create a directory in your ansible working dir, for example « mkdir inventory »
 2. Create a file named « ansible.cfg » in your ansible working dir, content below:
@@ -88,7 +88,7 @@ Ansible help :
   - all
     ```
 
-## You can list serveurs without start your playbook :
+## You can list hosts without run your playbook :
 
     ansible-playbook ping.yml --list-hosts
 
