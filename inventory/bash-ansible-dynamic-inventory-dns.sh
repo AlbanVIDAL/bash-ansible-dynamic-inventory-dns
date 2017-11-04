@@ -35,9 +35,9 @@
 # By Alban Vidal <alban.vidal@zordhak.fr>
 #
 # Creation date	2017-06-12
-# Update date	2017-06-14
+# Update date	2017-11-04
 #
-# version 0.11
+# version 0.12
 #
 ################################################################################
 #
