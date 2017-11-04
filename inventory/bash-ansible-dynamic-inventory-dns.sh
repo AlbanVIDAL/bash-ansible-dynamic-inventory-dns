@@ -35,9 +35,9 @@
 # By Alban Vidal <alban.vidal@zordhak.fr>
 #
 # Creation date	2017-06-12
-# Update date	2017-06-14
+# Update date	2017-11-04
 #
-# version 0.10
+# version 0.12
 #
 ################################################################################
 #
@@ -50,6 +50,8 @@
 # 4  : Transfer failed
 # 5  : Result is empty
 # 6  : Tempory file is empty, please use --force option to reload cache
+# 7  : incorrect CSV output type
+# 8  : ERROR: "--host" requires a non-empty option argument
 # 99 : Options error
 #
 ################################################################################
@@ -59,7 +61,8 @@
 #                             You can edit value below:
 
 # Define seach zones :
-_SEARCH_ZONE_="domain1.example.com domain2.example.com"
+#_SEARCH_ZONE_="domain1.example.com domain2.example.com"
+_SEARCH_ZONE_="lxc.zordhak.fr zordhak.fr" ## DEV ONLY
 
 # define tempory file (cache file) to store results :
 _CACHE_FILE_="/tmp/dns-inventory_$USER.tmp"
@@ -70,17 +73,29 @@ _CACHE_FILE_="/tmp/dns-inventory_$USER.tmp"
 # 3600  = 1 hour
 # 86400 = 1 day
 _CACHE_TTL_="600"
-
+#
 #                             --- END SET USER VARS ---
 ################################################################################
 #
 #                           --- START SET PROGRAM VARS ---
 #
 #                               !!! DO NOT MODIFY !!! 
+#
 # default output format is json :
 FORMAT='json'
+#
+# Output type : all / list / host
+# all :print all
+# list : print list of hosts
+# host XXX : print host XXX vars
+TYPE='all'
+#
 # if true, disable querry and not use cache
 FORCE=false
+#
+# HOST is value of « --host HOST » argument
+HOST=''
+#
 #                           --- END SET PROGRAM VARS ---
 ################################################################################
 
@@ -91,11 +106,11 @@ function usage()
     echo -e "Usage: $0 [OPTIONS]"
     echo -e ""
     echo -e "[OPTIONS] :"
-    echo -e "  --list  | -l     default option, print to json format (needed to ansible)"
-    echo -e "  --force | -f     force querry, reload the cache"
-    echo -e "  --csv   | -c     print output to csv - i.e : key1;\"value1\""
-    echo -e "  --host  | -o     pour ansible, a voir si ça peut servir"
-    echo -e "  --help  | -h     print help and quit"
+    echo -e "  --list  | -l            ------------> default option, print to json format (needed to ansible)"
+    echo -e "  --force | -f            ------------> force querry, reload the cache"
+    echo -e "  --csv   | -c            ------------> print output to csv - i.e : key1;\"value1\""
+    echo -e "  --host  | -o [HOSTNAME] ------------> print host vars"
+    echo -e "  --help  | -h            ------------> print help and quit"
 
 } # end usage()
 
@@ -174,15 +189,53 @@ function output_json()
 # Print output in csv format :
 function output_csv()
 {
+        case $TPYE in
+            "list")
+#echo "output_csv:list"
+                while read DNS
+                do
+ 
+                    SRV=$(echo $DNS|awk -F ';' '{print $1}'|sed 's/\.$//')
+                    TXT=$(echo $DNS|awk -F ';' '{print $2}')
 
-    while read DNS
-    do
-        SRV=$(echo $DNS|awk -F ';' '{print $1}'|sed 's/\.$//')
-        TXT=$(echo $DNS|awk -F ';' '{print $2}')
+#echo "$TXT"
+                if echo "$TXT"|grep -E '^"vars=' > /dev/null
+                then
+#echo "VARS"
+                    continue
+                fi
 
-        echo "$SRV;$TXT"
 
-    done < "$_CACHE_FILE_"
+                    echo "$SRV;$TXT"
+                done < "$_CACHE_FILE_"
+
+            ;;
+
+            "host")
+
+#echo "output_csv:host"
+                grep -E "$HOST.*vars=" "$_CACHE_FILE_"
+
+            ;;
+
+            "all") # default option
+                cat "$_CACHE_FILE_"
+            ;;
+ 
+
+            *)
+
+# no more used, default case is « all »
+# on est dans le cas all, donc on peut afficher tel quel
+                >&2 echo "ERROR: incorrect CSV output type"
+                >&2 echo "Please specify --list or --host option"
+                exit 7
+
+            ;;
+        esac
+
+
+
 
 } # end output_csv()
 
@@ -253,13 +306,26 @@ do
         -c|--csv)
             # output to csv format
             FORMAT='csv'
+#echo "CSV"
             ;;
         -l|--list)
             # required for ansible, ansible call this script whith --list option
             # ansible need JSON format
+            TPYE='list'
+#echo "list"
             ;;
         -o|--host)
             # COMMING SOON !
+            TPYE='host'
+            
+            if [ -n "$2" ]; then
+                HOST="$2"
+#echo "HOST:$HOST"
+                shift
+            else
+                >&2 echo 'ERROR: "--host" requires a non-empty option argument'
+                exit 8
+            fi
 #
 # When called with the arguments --host <hostname> (where <hostname> is a host from above), the script must print either an empty JSON 
 # hash/dictionary, or a hash/dictionary of variables to make available to templates and playbooks. Printing variables is optional, if the script does not 
@@ -270,7 +336,7 @@ do
 #    "monitoring": "pack.example.com"
 # }
 #
-            exit 0
+#            exit 0
             ;;
         --)
             shift
